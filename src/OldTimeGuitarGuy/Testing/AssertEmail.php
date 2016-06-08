@@ -22,7 +22,7 @@ trait AssertEmail
      */
     public function getAllEmails()
     {
-        $emails = $this->jsonEmail($this->mailcatcher())->get('message');
+        $emails = $this->jsonEmail($this->mailcatcher()->get('messages'));
 
         if ( empty($emails) ) {
             $this->fail('No messages returned');
@@ -51,6 +51,19 @@ trait AssertEmail
         $email_id = last($this->getAllEmails())->id;
 
         return $this->mailcatcher()->get("messages/{$email_id}.json");
+    }
+
+    /**
+     * Go through each email, calling the callback along the way
+     *
+     * @param  \Closure $callback
+     * @return void
+     */
+    public function eachEmail(\Closure $callback)
+    {
+        array_map(function($email) use ($callback) {
+            $callback($this->mailcatcher()->get("messages/{$email->id}.json"));
+        }, $this->getAllEmails());
     }
 
     ////////////////
@@ -142,6 +155,28 @@ trait AssertEmail
     public function assertNotEmailWasSentFrom($sender, \GuzzleHttp\Psr7\Response $email)
     {
         $this->assertContains("<{$sender}>", $this->sender($email));
+    }
+
+    /**
+     * Assert that the email reply to contains the given email address
+     *
+     * @param  string                    $replyTo
+     * @param  \GuzzleHttp\Psr7\Response $email
+     */
+    public function assertEmailReplyToContains($replyTo, \GuzzleHttp\Psr7\Response $email)
+    {
+        $this->assertRegExp("/Reply-To:\s.*?<?((?:[a-zA-Z0-9_\-\.]+)@(?:(?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(?:(?:[a-zA-Z0-9\-]+\.)+))(?:[a-zA-Z]{2,4}|[0-9]{1,3})(?:\]?))>?/", $this->body($email));
+    }
+
+    /**
+     * Assert that the email reply to DOES NOT contain the given email address
+     *
+     * @param  string                    $replyTo
+     * @param  \GuzzleHttp\Psr7\Response $email
+     */
+    public function assertEmailReplyToNotContains($replyTo, \GuzzleHttp\Psr7\Response $email)
+    {
+        $this->assertNotRegExp("/Reply-To:\s.*?<?((?:[a-zA-Z0-9_\-\.]+)@(?:(?:\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(?:(?:[a-zA-Z0-9\-]+\.)+))(?:[a-zA-Z]{2,4}|[0-9]{1,3})(?:\]?))>?/", $this->body($email));
     }
 
     ///////////////////////
