@@ -1,0 +1,20 @@
+{
+    "name": "oldtimeguitarguy/assert-email",
+    "description": "Email assertions trait for phpunit using mailcatcher",
+    "require": {
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Karl Hepler",
+            "email": "khepler@brandmovers.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "OldTimeGuitarGuy\\Testing\\": "src/"
+        }
+    }
+}
