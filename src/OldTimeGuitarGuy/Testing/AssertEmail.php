@@ -203,7 +203,7 @@ trait AssertEmail
      */
     protected function body(\GuzzleHttp\Psr7\Response $email)
     {
-        return $this->jsonEmail($email)->source;
+        return str_replace(["=\r\n", "\r\n"], ['', PHP_EOL], $this->jsonEmail($email)->source);
     }
 
     /**
